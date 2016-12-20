@@ -40,6 +40,8 @@ $(document).ready(function(){
 
       var r,g,b;
 
+      // vamos a calcular tres componentes, entre 0 y 255
+
       // redondear hacia abajo:
       r = Math.floor( Math.random() * 255 );
 
@@ -50,14 +52,17 @@ $(document).ready(function(){
       // redondear hacia arriba:
       b = Math.ceil( Math.random() * 255 );
 
+
       // "this" recibe el objeto con el que se interactúa,
       // en este caso, es 'body'
-      $(this).css({
-         backgroundColor:
-         // integramos manualmente (concatenamos)
-         // un string de color rgba
-         'rgba(' + r + ',' + g + ',' + b + ', 1 )'
-      })
+
+      // integramos manualmente (concatenamos)
+      // un string de color rgba
+      var stringDeColor = 'rgba(' + r + ',' + g + ',' + b + ',1 )'
+
+      console.log( r, g, b, stringDeColor );
+
+      $(this).css({ backgroundColor: stringDeColor })
 
    })
 
