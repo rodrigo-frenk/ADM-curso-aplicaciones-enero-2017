@@ -9,5 +9,86 @@
 </head>
 <body>
 
+   <!-- etiqueta -->
+   <etiqueta></etiqueta>
+
+   <!-- etiqueta#identidad -->
+   <etiqueta id="identidad"></etiqueta>
+
+   <!-- etiqueta.clase1.clase2.clase3 -->
+   <etiqueta class="clase1 clase2 clase3"></etiqueta>
+
+   <!-- etiqueta#identidad.clase1.clase2 -->
+   <etiqueta id="identidad" class="clase1 clase2"></etiqueta>
+
+   <!-- etiqueta{Contenido} -->
+   <etiqueta>Contenido</etiqueta>
+
+
+   <!-- etiqueta[atributo=unvalor][otroatributo=otrovalor] -->
+   <etiqueta atributo="unvalor" otroatributo="otrovalor"></etiqueta>
+
+
+   <!-- Atributos Default: -->
+   <!-- a[http://google.com] -->
+   <a href="http://google.com"></a>
+
+   <!-- img[http://fakeimg.pl/1200x450] -->
+   <img src="http://fakeimg.pl/1200x450" alt="">
+
+
+
+   <!-- combinando id, clases, atributos -->
+   <!-- etiqueta#identidad.clase1.clase2[atributo=unvalor]{Contenido} -->
+   <etiqueta id="identidad" class="clase1 clase2" atributo="unvalor">
+      Contenido
+   </etiqueta>
+
+
+   <!-- Elementos hermanos -->
+   <!-- h1{Título}+p{Texto} -->
+   <h1>Título</h1>
+   <p>Texto</p>
+
+
+   <!-- Elementos hijos -->
+   <!-- p>lorem13 -->
+   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur incidunt totam aut quasi.</p>
+
+
+   <!-- Jerarquía: Hijos de hijos de hijos... -->
+   <!-- nav>ul>li>a -->
+   <nav>
+      <ul>
+         <li><a href=""></a></li>
+      </ul>
+   </nav>
+
+
+   <!-- Jerarquía: Subir un nivel: -->
+   <!-- div>p>lorem7^+img -->
+   <div>
+      <p>
+         Lorem ipsum dolor sit amet, consectetur adipisicing.
+      </p>
+      <img src="" alt="">
+   </div>
+
+   <!-- Multiplicar -->
+   <!-- (podemos saber el número de repetición) -->
+   <!-- p{Texto $}*4 -->
+   <p>Texto 1</p>
+   <p>Texto 2</p>
+   <p>Texto 3</p>
+   <p>Texto 4</p>
+
+
+
+   <!-- Agrupar -->
+   <!-- (p>lorem14)*3 -->
+   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam nulla et temporibus quam dolor.</p>
+   <p>Fugit quisquam quidem possimus expedita, dignissimos maxime ex in animi dolorum hic! Nobis, quaerat?</p>
+   <p>Tempore at, repellat quisquam sint officiis ipsam, libero placeat veritatis quo laborum velit, dolor.</p>
+
 </body>
 </html>
