@@ -1,0 +1,135 @@
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora</title>
+
+  <link rel="stylesheet" href="css/foundation.css">
+  <link rel="stylesheet" href="recursos/font-awesome-4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/app.css">
+
+</head>
+<body>
+
+
+  <!-- main#calculadora.columns.medium-6.large-4.medium-centered -->
+  <main id="calculadora" class="columns medium-6 large-3 medium-centered">
+
+    <div id="calculadora-pantalla" class="columns small-9 button hollow">
+      0
+    </div>
+
+    <div
+    id="calculadora-reinicio"
+    class="columns small-3 button"
+    data-accion="reinicio">
+      CE
+    </div>
+
+
+      <ul id="calculadora-numeros" class="columns p-0">
+        <!-- li.calculadora-numero.columns.small-4.button.text-center{$}*10 -->
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="1">
+        1</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="2">
+        2</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="3">
+        3</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="4">
+        4</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="5">
+        5</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="6">
+        6</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="7">
+        7</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="8">
+        8</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="9">
+        9</li>
+
+        <li
+        id="calculadora-punto"
+        class="columns small-4 button text-center"
+        data-accion="decimal">
+        .</li>
+        <li
+        class="calculadora-numero columns small-4 button text-center"
+        data-numero="0">
+        0</li>
+        <li
+        id="calculadora-resultado"
+        class="columns small-4 button text-center"
+        data-accion="resultado">
+        =</li>
+
+      </ul>
+
+      <ul id="calculadora-operaciones-basicas" class="columns p-0">
+        <li
+        class="calculadora-operacion columns small-3 button text-center"
+        data-accion="suma">
+          +
+        </li>
+        <li
+        class="calculadora-operacion columns small-3 button text-center"
+        data-accion="resta">
+          -
+        </li>
+        <li
+        class="calculadora-operacion columns small-3 button text-center"
+        data-accion="multiplicacion">
+          x
+        </li>
+        <li
+        class="calculadora-operacion columns small-3 button text-center"
+        data-accion="division">
+          %
+        </li>
+      </ul>
+
+
+      <ul id="calculadora-operaciones-avanzadas" class="columns p-0">
+        <li
+        class="calculadora-operacion columns small-6 button text-center"
+        data-accion="potencia">
+          ^
+        </li>
+
+        <li
+        class="calculadora-operacion columns small-6 button text-center"
+        data-accion="raiz">
+          √n
+        </li>
+
+      </ul>
+
+  </main>
+
+
+  <script src="js/vendor/jquery.js"></script>
+  <script src="js/vendor/what-input.js"></script>
+  <script src="js/vendor/foundation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

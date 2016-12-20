@@ -1,0 +1,29 @@
+* {
+  outline: 1px solid #def;
+}
+
+/* RESETS */
+
+ul, li {
+  margin: 0;
+}
+
+
+
+
+.hidden {
+  display: none;
+}
+
+
+/* margen izquierdo para el número 0 */
+/*
+.calculadora-numero:nth-child(10) {
+  margin-left: 33.33%;
+}
+*/
+
+
+.p-0 {
+  padding: 0;
+}
