@@ -17,3 +17,19 @@
 .h-3x {
    height: 225px;
 }
+
+
+
+body,html {
+   height: 100%;
+}
+
+.h-100 {
+   height: 100%;
+}
+
+
+.square-h {
+   background-color: red;
+   width: 40%;
+}
