@@ -1,0 +1,19 @@
+
+/* dibujar contorno para facilitar maquetado */
+* {
+   outline: 1px solid #def;
+}
+
+
+
+.h-1x {
+   height: 75px;
+}
+
+.h-2x {
+   height: 150px;
+}
+
+.h-3x {
+   height: 225px;
+}
