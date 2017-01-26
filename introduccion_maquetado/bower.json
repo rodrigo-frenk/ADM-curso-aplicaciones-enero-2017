@@ -17,6 +17,7 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "jquery": "^3.1.1",
-    "imgLiquid": "^0.9.944"
+    "imgLiquid": "^0.9.944",
+    "font-awesome": "^4.7.0"
   }
 }
