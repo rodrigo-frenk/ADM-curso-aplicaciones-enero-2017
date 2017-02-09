@@ -1,0 +1,22 @@
+.nospacing {
+  padding: 0;
+  margin: 0;
+}
+
+
+html, body {
+  @extend .nospacing;
+}
+
+ul {
+  // el elemento dentro de que estamos se representa con &
+  &, li {
+    @extend .nospacing;
+  }
+}
+
+
+
+li {
+  list-style: none;
+}

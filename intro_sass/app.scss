@@ -1,0 +1,82 @@
+$fontsize_base: 16px;
+$altura_base: 80px;
+$color_base: #c1ed0b;
+
+
+@debug "iniciando sass";
+
+@import 'reset';
+@import 'layout';
+@import 'tipografias';
+@import 'colores';
+
+
+/* dibujar contorno para facilitar maquetado */
+* {
+   outline: 1px solid $color_base;
+}
+
+
+// anidando selectores:
+
+main#area-principal {
+
+  .bullet {
+
+    .imagen {
+       margin-bottom: $fontsize_base;
+    }
+
+    span {
+       font-weight: bold;
+    }
+
+  }
+
+}
+
+
+
+
+.square-h {
+   background-color: red;
+   width: 40%;
+}
+
+
+// ejemplo de mixins:
+
+
+@mixin color-fondo-texto($color_fondo, $color_texto) {
+  background-color: $color_fondo;
+  color: $color_texto;
+}
+//
+//
+// .bullet:nth-child(1) {
+//   @include color-fondo-texto( #4567fa, #a567fa );
+// }
+// .bullet:nth-child(2) {
+//   @include color-fondo-texto( #a567fa, #45f022 );
+// }
+// .bullet:nth-child(3) {
+//   @include color-fondo-texto( #45f022, #4567fa );
+// }
+
+
+.bullet .imagen {
+
+  height: 33vw / (16/9);
+
+
+}
+
+
+// cuando no queremos usar clases en el html, podemos quedarnos dentro del scss,
+//reciclando clases y mixins
+.misuperelemento {
+  @extend .p-1;
+  @extend .h-4x;
+  @extend .color-primary-1-bg;
+  @include color-fondo-texto(#456,#fa0)
+}

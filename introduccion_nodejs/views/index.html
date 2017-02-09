@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+<head>
+
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+   <title>CHATSNAP</title>
+
+
+   <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+   <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+
+   <link rel="stylesheet" href="/assets/css/base-style.css">
+   
+   <link rel="stylesheet" href="/assets/css/mi-estilo.css">
+
+</head>
+
+
+<body class="">
+
+   <!--
+   <ul id="messages"></ul>
+
+   <form id="formulario-nombre" action="">
+      <input id="n" autocomplete="off"/><button>Send</button>
+   </form>
+
+   <form id="formulario-mensaje" action="">
+      <input id="m" autocomplete="off"/><button>Send</button>
+   </form>
+   -->
+
+      <form
+      id="login-window"
+      class="col-xs-10 col-md-6 col-lg-4
+      col-xs-offset-1 col-md-offset-3 col-lg-offset-4">
+
+         <h1>Bienvenid@</h1>
+
+         <p>Ingresa tu nombre de usuario</p>
+
+         <input type="text" placeholder="nombredeusuario">
+
+         <button type="submit">
+            Entrar
+         </button>
+
+      </form>
+
+
+      <div id="chat-window" class="container-fluid">
+         <!-- header+sidebar+main+footer -->
+         <header class="row">
+
+            <div class="col-xs-6 col-md-4 col-lg-3">
+               <h6>
+               </h6>
+            </div>
+
+            <div class="col-xs-6 col-md-4 col-lg-3 col-md-offset-4 col-lg-offset-6 text-right">
+               <button id="button-group-chat">
+                  Chat Grupal
+               </button>
+            </div>
+         </header>
+
+         <div id="users-messages-container">
+            <aside id="users" class="col-md-3 h-xs-30 h-md-100 scroll-y">
+
+               <ul>
+
+                  <li class="user">
+                     <span class="username">
+                        username
+                     </span>
+                     <span class="number-messages">
+                        99
+                     </span>
+                  </li>
+
+                  <li class="user">
+                     <span class="username">
+                        username
+                     </span>
+                     <span class="number-messages" active="true">
+                        99
+                     </span>
+                  </li>
+
+                  <li class="user">
+                     <span class="username">
+                        username
+                     </span>
+                     <span class="number-messages">
+                        99
+                     </span>
+                  </li>
+
+               </ul>
+
+            </aside>
+
+            <main id="messages" class="col-md-9 h-xs-70 h-md-100 scroll-y">
+               <ul>
+                  <li class="message">
+                     <span class="username">
+                        username
+                     </span>
+                     <!-- span.message>lorem16 -->
+                     <span class="message-text">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima similique, provident atque voluptatem accusantium soluta enim.
+                     </span>
+                  </li>
+                  <li class="message">
+                     <span class="username">
+                        username
+                     </span>
+                     <!-- span.message>lorem16 -->
+                     <span class="message-text">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima similique, provident atque voluptatem accusantium soluta enim.
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima similique, provident atque voluptatem accusantium soluta enim.
+                     </span>
+                  </li>
+               </ul>
+            </main>
+         </div>
+
+         <footer class="row">
+            <form id="message-form" action="">
+
+               <!-- input#message.col-xs-9.col-md-10.col-lg-11 -->
+               <input type="text" id="message" class="col-xs-9 col-md-10 col-lg-11">
+
+               <!-- button.col-xs-3.col-md-2.col-lg-1[type=submit]{Enviar} -->
+               <button class="col-xs-3 col-md-2 col-lg-1" type="submit">
+                  Enviar
+               </button>
+
+            </form>
+
+
+         </footer>
+
+      </div>
+
+   <script src="/socket.io/socket.io.js"></script>
+
+   <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+   <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+   <script>
+
+   var socket = io();
+
+   $('#login-window').submit(function(){
+
+      username = $('#login-window input[type="text"]').val()
+
+      socket.emit('set username', username );
+
+
+      $('#chat-window header h6').html( username )
+
+      $('#login-window').fadeOut(300, function(){
+
+         $('#chat-window').fadeIn(300)
+
+      })
+
+      return false;
+
+   });
+
+   $('#formulario-mensaje').submit(function(){
+      socket.emit('chat message', $('#m').val());
+      $('#m').val('');
+      return false;
+   });
+
+   socket.on('chat message', function(msg){
+    $('#messages').append($('<li>').text(msg));
+   });
+   </script>
+
+</body>
+</html>

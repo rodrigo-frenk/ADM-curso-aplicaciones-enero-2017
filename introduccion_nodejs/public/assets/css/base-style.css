@@ -1,0 +1,117 @@
+* {
+   outline: 1px solid #def;
+}
+
+ul, li {
+   margin: 0;
+   padding: 0;
+}
+
+li {
+   list-style: none;
+}
+
+#login-window {
+   margin-top: 30vh;
+   height: 40vh;
+   background-color: #eee;
+
+   -webkit-box-shadow: 3px 3px 3px rgba(0,0,0,0.4);
+   box-shadow: 3px 3px 3px rgba(0,0,0,0.4);
+
+}
+
+
+
+#chat-window > header, #chat-window > footer {
+   height: 4em;
+}
+
+#chat-window > #users-messages-container {
+   height: calc(100vh - 8em);
+}
+
+@media screen and (min-width: 0px) {
+
+   #chat-window > header, #chat-window > footer {
+      height: 3em;
+   }
+
+   #chat-window > #users-messages-container {
+      height: calc(100vh - 6em);
+   }
+
+   .h-xs-30 {
+      height: 30%;
+      display: block;
+   }
+   .h-xs-70 {
+      height: 70%;
+      display: block;
+   }
+
+}
+@media screen and (min-width: 960px) {
+
+   .h-md-100 {
+      height: 100%;
+      display: block;
+   }
+
+}
+
+#chat-window {
+   display: none;
+}
+
+
+
+.user .username,
+.user .number-messages,
+.message .username,
+.message .message-text {
+   width: auto;
+   padding: 4px;
+   font-size: 14px;
+}
+
+.user .number-messages {
+   display: none;
+}
+
+.user .number-messages[active] {
+   display: inline-block;
+   margin-bottom: 8px;
+   padding: 4px;
+
+   background-color: red;
+   /*bdrs*/
+   border-radius: 50%;
+   /*fz10*/
+   font-size: 9px;
+   /*fwb*/
+   font-weight: bold;
+
+   color: white
+}
+
+
+.message, .user {
+   padding: 16px;
+}
+
+.message .username {
+   color: #aaa;
+   font-weight: bold;
+}
+
+.message:nth-child(odd) {
+   background-color: #eaeaea;
+}
+.message:nth-child(even) {
+   background-color: #fafafa;
+}
+
+.scroll-y {
+   overflow-y: auto;
+}

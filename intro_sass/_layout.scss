@@ -1,0 +1,83 @@
+
+body,html {
+   height: 100%;
+}
+
+
+
+
+
+.h-33 {
+   height: 33.33%;
+}
+
+.h-45 {
+   height: 45%;
+}
+
+.h-55 {
+   height: 55%;
+}
+
+.h-100 {
+   height: 100%;
+}
+
+
+
+// directivas para hacer loop y generar automáticamente clases:
+
+@for $i from 0 through 10 {
+
+  .h-#{$i}x {
+
+    height: 80px * $i
+
+  }
+
+}
+
+// Generar clases para padding:
+
+$nombre_clase: p;
+
+@for $i from 0 through 10 {
+
+  .#{$nombre_clase}-#{$i} {
+
+    padding: 8px * $i
+
+  }
+
+}
+
+
+/****** LAYOUT ******/
+
+header#cabecera-principal,
+footer#pie-pagina {
+   position: fixed;
+   left: 0;
+   width: 100%;
+}
+
+header#cabecera-principal {
+   top: 0;
+}
+
+
+
+header #icono-menu .btn {
+   padding: 0;
+}
+
+
+
+footer#pie-pagina {
+   bottom: 0;
+}
+
+
+main#area-principal {
+   padding-top: 75px;
+}

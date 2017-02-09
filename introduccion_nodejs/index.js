@@ -1,29 +1,36 @@
-var app = require('express')();
+var express = require('express')
+var app = express()
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+// línea necesaria para poder servir recursos desde nuestro HTML:
+app.use('/bower_components', express.static('bower_components') )
+
+app.use('/assets', express.static('public/assets') )
 
 var clients = []
 
 
 app.get('/', function(req, res){
-   res.sendFile( __dirname + '/index.html')
+   res.sendFile( __dirname + '/views/index.html')
 });
 
+
+// io es un gestor de conexiones:
+// declarar funcion "callback" a ejecutarse al conectarse un cliente
+
 io.on('connection', function(socket){
+
    console.log('a user connected');
 
    clients[socket.id] = {
       id: socket.id,
-      nickname: "Sin Nombre"
+      username: "Sin Nombre"
    }
 
-   // clients.push({
-   //    id: socket.id,
-   //    nickname: "Sin Nombre"
-   // })
-
+   // enviar un mensaje a todos los clientes:
    io.emit('chat message', 'Nuevo Usuario: ' + socket.id );
+
 
    socket.on('disconnect', function(){
       console.log('user disconnected');
@@ -33,22 +40,24 @@ io.on('connection', function(socket){
    socket.on('chat message', function(msg){
 
       console.log('message: ' + msg);
-
+      // obtener usuario a partir de la ID de la conexion:
       var user = clients[ socket.id ];
 
-      var displayText = user.nickname + ": " + msg
+      // construir un mensaje
+      var displayText = user.username + ": " + msg
 
+      // enviamos nuevo mensaje a todos los clientes
       io.emit('chat message', displayText );
 
    });
 
-   socket.on('set nickname', function(msg){
+   socket.on('set username', function(msg){
 
-      console.log('set nickname: ' + msg);
+      console.log('set username: ' + msg);
 
       var user = clients[ socket.id ];
 
-      user.nickname = msg
+      user.username = msg
 
    });
 
