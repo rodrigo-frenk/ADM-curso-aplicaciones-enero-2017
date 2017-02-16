@@ -4,9 +4,14 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 // línea necesaria para poder servir recursos desde nuestro HTML:
+
+// establecer el nombre de una locacion, y mapearla al directorio servido por express
+
 app.use('/bower_components', express.static('bower_components') )
 
 app.use('/assets', express.static('public/assets') )
+
+
 
 var clients = []
 
@@ -17,47 +22,79 @@ app.get('/', function(req, res){
 
 
 // io es un gestor de conexiones:
-// declarar funcion "callback" a ejecutarse al conectarse un cliente
+// declararemos funcion "callback" a ejecutarse al conectarse un cliente
+
+/*
+// cada mensaje enviado por un usuario está
+// estructurado en un Objeto así:
+
+
+   payload = {
+      id: id_de_socket,
+      message: "..."
+   }
+
+*/
 
 io.on('connection', function(socket){
 
    console.log('a user connected');
 
    clients[socket.id] = {
+      socket: socket,
       id: socket.id,
-      username: "Sin Nombre"
+      username: "Sin Nombre",
+      lastLogin: new Date()
    }
 
-   // enviar un mensaje a todos los clientes:
-   io.emit('chat message', 'Nuevo Usuario: ' + socket.id );
 
+   socket.on('set username', function(payload){
+
+      clients[socket.id].username = payload.message
+
+      userLogin(socket)
+      userListChanged()
+   });
 
    socket.on('disconnect', function(){
-      console.log('user disconnected');
-      io.emit('chat message', 'Salió el usuario: ' + socket.id );
+      userLogout(socket)
+      userListChanged()
    });
 
-   socket.on('chat message', function(msg){
+   socket.on('chat message', function(payload){
 
-      console.log('message: ' + msg);
+      console.log('message: ' + payload.message);
       // obtener usuario a partir de la ID de la conexion:
-      var user = clients[ socket.id ];
 
-      // construir un mensaje
-      var displayText = user.username + ": " + msg
+      // debido a la naturaleza asincrónica de la app,
+      // tendremos que detectar qué socket está activo
+      // utilizando su Id y buscándola en nuestra lista
 
-      // enviamos nuevo mensaje a todos los clientes
-      io.emit('chat message', displayText );
+      targetId = 0
 
-   });
+      var messagePayload = {
+         sourceId: payload.id,
+         message: payload.message
+      }
 
-   socket.on('set username', function(msg){
 
-      console.log('set username: ' + msg);
+      if(typeof( payload.targetId ) === "undefined") {
 
-      var user = clients[ socket.id ];
+         console.log( "TYPEOF", typeof( payload.targetId ) )
+         // mensaje grupal
+         io.emit('chat message', messagePayload )
 
-      user.username = msg
+      } else {
+
+         //mesnaje privado
+
+         messagePayload.targetId = payload.targetId
+
+         clients[ payload.targetId ].socket.emit('chat message', messagePayload )
+
+      }
+
+
 
    });
 
@@ -69,3 +106,75 @@ io.on('connection', function(socket){
 http.listen(3000, function(){
    console.log('listening on *:3000');
 });
+
+
+
+
+
+
+
+function userListChanged() {
+
+   // recuperar lista de todos los usuarios
+   var activeUsers = getActiveUsers()
+
+   var payload = {
+      activeUsers: activeUsers
+   }
+
+   io.emit('user list changed', payload)
+
+}
+
+
+function userLogin(socket) {
+   io.emit('user login', getUserPayload(socket))
+}
+
+function userLogout(socket) {
+
+   io.emit('user logout', getUserPayload(socket))
+
+   delete clients[socket.id]
+
+}
+
+
+function getUserPayload(socket) {
+
+   var payload = {
+      id: socket.id,
+      username: clients[socket.id].username,
+      time: new Date()
+   }
+
+   return payload
+
+}
+
+
+// funciones lógicas
+
+
+function getActiveUsers() {
+
+   var activeUsersList = {}
+
+   // popular una nueva lista de clientes
+   for( i in clients ) {
+
+      // preparar los datos relevantes
+      activeUser = {
+         id: clients[i].id,
+         username: clients[i].username,
+      }
+
+
+      // insertar cada usuario en el objeto
+      activeUsersList[ clients[i].id ] = activeUser
+
+   }
+
+   return activeUsersList
+
+}

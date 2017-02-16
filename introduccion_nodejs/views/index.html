@@ -13,7 +13,7 @@
    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
 
    <link rel="stylesheet" href="/assets/css/base-style.css">
-   
+
    <link rel="stylesheet" href="/assets/css/mi-estilo.css">
 
 </head>
@@ -72,32 +72,15 @@
 
                <ul>
 
-                  <li class="user">
+                  <li class="user model hidden">
                      <span class="username">
                         username
                      </span>
                      <span class="number-messages">
-                        99
+                        0
                      </span>
                   </li>
 
-                  <li class="user">
-                     <span class="username">
-                        username
-                     </span>
-                     <span class="number-messages" active="true">
-                        99
-                     </span>
-                  </li>
-
-                  <li class="user">
-                     <span class="username">
-                        username
-                     </span>
-                     <span class="number-messages">
-                        99
-                     </span>
-                  </li>
 
                </ul>
 
@@ -105,7 +88,7 @@
 
             <main id="messages" class="col-md-9 h-xs-70 h-md-100 scroll-y">
                <ul>
-                  <li class="message">
+                  <li class="message model hidden">
                      <span class="username">
                         username
                      </span>
@@ -114,16 +97,7 @@
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima similique, provident atque voluptatem accusantium soluta enim.
                      </span>
                   </li>
-                  <li class="message">
-                     <span class="username">
-                        username
-                     </span>
-                     <!-- span.message>lorem16 -->
-                     <span class="message-text">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima similique, provident atque voluptatem accusantium soluta enim.
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima similique, provident atque voluptatem accusantium soluta enim.
-                     </span>
-                  </li>
+
                </ul>
             </main>
          </div>
@@ -155,11 +129,24 @@
 
    var socket = io();
 
+   var currentActiveUsers
+
+   var targetUserId
+
+
+
+   // Interacciones de usuario
+
    $('#login-window').submit(function(){
 
       username = $('#login-window input[type="text"]').val()
 
-      socket.emit('set username', username );
+      var payload = {
+         id: socket.id,
+         message: username
+      }
+
+      socket.emit('set username', payload )
 
 
       $('#chat-window header h6').html( username )
@@ -174,15 +161,135 @@
 
    });
 
-   $('#formulario-mensaje').submit(function(){
-      socket.emit('chat message', $('#m').val());
-      $('#m').val('');
-      return false;
+   $('#message-form').submit(function(){
+
+      message = $('#message').val()
+
+
+      var payload = {
+         id: socket.id,
+         message: message
+      }
+
+      // si hay un usuario seleccionado, acompañar mensaje con ID de usuario destino
+
+      if( typeof(targetUserId) != "undefined" ) {
+         payload.targetId = targetUserId
+      }
+
+      socket.emit('chat message', payload )
+
+      $('#message').val('')
+
+      return false
+
    });
 
-   socket.on('chat message', function(msg){
-    $('#messages').append($('<li>').text(msg));
+
+
+   // Funciones que responderán a socket.io
+
+   socket.on('chat message', function(payload){
+
+      printMessage({
+         username: currentActiveUsers[ payload.sourceId ].username,
+         text: payload.message
+      }, 'chat-message' )
+
    });
+
+
+
+
+   socket.on('user list changed', function(payload) {
+
+      currentActiveUsers = payload.activeUsers
+
+      $('#users ul .user:not(.model)').remove()
+
+      for(i in currentActiveUsers) {
+         var userHtml = $('.user.model').clone().detach()
+
+         userHtml.find('.username').html( currentActiveUsers[i].username )
+
+         userHtml.attr( 'data-id', currentActiveUsers[i].id )
+
+         userHtml.removeClass('hidden model')
+
+         userHtml.appendTo('#users ul')
+
+      }
+
+      setupUserClick()
+
+   })
+
+   socket.on('user login', function(payload) {
+
+      printMessage({
+         username: payload.username,
+         text: 'Entró al chat.'
+      }, 'notification' )
+
+   })
+
+   socket.on('user logout', function(payload) {
+
+      printMessage({
+         username: payload.username,
+         text: 'Salió del chat.'
+      }, 'notification' )
+
+   })
+
+
+
+   function printMessage( message, cssClasses ) {
+
+      newMessage = $('#messages .message.model').clone().detach()
+
+      newMessage.find('.username').html( message.username )
+      newMessage.find('.message-text').html( message.text )
+
+      newMessage.addClass( cssClasses )
+
+      newMessage.removeClass('model hidden')
+
+      newMessage.appendTo('#messages ul')
+
+   }
+
+
+
+   function setupUserClick() {
+      // clicar un usuario para abrir conversación con él
+      $('#users .user').click(function(){
+         // obtener su ID a partir de atributo 'data-id' del 'li' clicado
+
+         targetUserId = $(this).data('id')
+
+         console.log( "selected:", targetUserId )
+
+         // al abrir conversación con usuario
+         // marcar mensajes como Leidos
+         // mostrar los mensajes previos con ese usuario
+      })
+
+   }
+
+
+   $('#button-group-chat').click(function(){
+      targetUserId = undefined;
+   })
+
+
+   // si recibimos mensaje de un usuario
+      // si tenemos la ventana de ese usuario abierta
+         // mostrar mensaje en ventana
+      // de otro modo,
+         // aumentar numero de mensajes no leidos de ese usuario en la lista de usuarios
+
+
    </script>
 
 </body>

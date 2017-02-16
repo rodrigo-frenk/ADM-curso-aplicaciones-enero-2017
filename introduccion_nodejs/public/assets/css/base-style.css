@@ -11,6 +11,15 @@ li {
    list-style: none;
 }
 
+
+.hidden {
+   display: none;
+}
+
+
+
+
+
 #login-window {
    margin-top: 30vh;
    height: 40vh;
@@ -114,4 +123,19 @@ li {
 
 .scroll-y {
    overflow-y: auto;
+}
+
+
+
+.notification {
+   font-size: 9px;
+   color: #888;
+   padding: 8px;
+}
+
+
+.chat-message {
+   color: #000;
+   font-size: 16px;
+   padding: 16px;
 }
