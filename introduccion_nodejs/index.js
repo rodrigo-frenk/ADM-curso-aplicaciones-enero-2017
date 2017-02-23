@@ -15,10 +15,33 @@ app.use('/assets', express.static('public/assets') )
 
 var clients = []
 
+var conversations = []
+
+var groupChatId = 0
+
+/*
+
+conversation = {
+   participants: [],
+   messages: []
+}
+
+
+*/
+
 
 app.get('/', function(req, res){
    res.sendFile( __dirname + '/views/index.html')
 });
+
+
+
+
+http.listen(3000, function(){
+   console.log('listening on *:3000');
+});
+
+
 
 
 // io es un gestor de conexiones:
@@ -36,30 +59,43 @@ app.get('/', function(req, res){
 
 */
 
+
+startGroupConversation()
+
+
 io.on('connection', function(socket){
 
    console.log('a user connected');
 
+   // almacenaremos el nuevo cliente usando su ID de socket como índice
    clients[socket.id] = {
       socket: socket,
       id: socket.id,
       username: "Sin Nombre",
-      lastLogin: new Date()
+      loginComplete: false,
+      lastLogin: new Date(),
+      conversations: []
    }
 
+   userListChanged()
 
-   socket.on('set username', function(payload){
 
-      clients[socket.id].username = payload.message
-
-      userLogin(socket)
-      userListChanged()
-   });
 
    socket.on('disconnect', function(){
       userLogout(socket)
       userListChanged()
    });
+
+   socket.on('set username', function(payload){
+
+      clients[socket.id].username = payload.message
+      clients[socket.id].loginComplete = true
+
+      userLogin(socket)
+      userListChanged()
+
+   });
+
 
    socket.on('chat message', function(payload){
 
@@ -77,17 +113,20 @@ io.on('connection', function(socket){
          message: payload.message
       }
 
-
+      // Verificar si el emisor especificó un destino:
+      // esto lo haremos revisando si la variable tiene un valor asignado
       if(typeof( payload.targetId ) === "undefined") {
 
+         // si no, mandó un mensaje grupal
+
          console.log( "TYPEOF", typeof( payload.targetId ) )
-         // mensaje grupal
+         //
          io.emit('chat message', messagePayload )
 
       } else {
 
          //mesnaje privado
-
+         // almacenar id del destinatario en el mensaje
          messagePayload.targetId = payload.targetId
 
          clients[ payload.targetId ].socket.emit('chat message', messagePayload )
@@ -103,23 +142,15 @@ io.on('connection', function(socket){
 
 
 
-http.listen(3000, function(){
-   console.log('listening on *:3000');
-});
-
-
-
 
 
 
 
 function userListChanged() {
 
-   // recuperar lista de todos los usuarios
-   var activeUsers = getActiveUsers()
-
+   // recuperar lista de todos los usuarios y meterla en un nuevo objeto
    var payload = {
-      activeUsers: activeUsers
+      activeUsers: getActiveUsers()
    }
 
    io.emit('user list changed', payload)
@@ -128,10 +159,27 @@ function userListChanged() {
 
 
 function userLogin(socket) {
+
+   addToConversation( groupChatId, socket.id )
+
+   console.log( "conversation", conversations[groupChatId].participants )
+
    io.emit('user login', getUserPayload(socket))
+
 }
 
 function userLogout(socket) {
+
+
+   // eliminar usuario de todas las conversaciones en las que esté
+
+   oldConversations = clients[socket.id].conversations
+
+   for( i in oldConversations ) {
+      removeFromConversation( i, socket.id )
+   }
+
+   console.log( "conversation", conversations[groupChatId].participants )
 
    io.emit('user logout', getUserPayload(socket))
 
@@ -140,21 +188,21 @@ function userLogout(socket) {
 }
 
 
+
+// funciones lógicas
+
+
 function getUserPayload(socket) {
 
    var payload = {
       id: socket.id,
       username: clients[socket.id].username,
-      time: new Date()
+      // time: new Date()
    }
 
    return payload
 
 }
-
-
-// funciones lógicas
-
 
 function getActiveUsers() {
 
@@ -163,18 +211,84 @@ function getActiveUsers() {
    // popular una nueva lista de clientes
    for( i in clients ) {
 
-      // preparar los datos relevantes
-      activeUser = {
-         id: clients[i].id,
-         username: clients[i].username,
+      if( clients[i].loginComplete ) {
+
+         // preparar los datos relevantes
+         var activeUser = {
+            id: clients[i].id,
+            username: clients[i].username,
+         }
+
+
+         // insertar cada usuario en el objeto
+         activeUsersList[ clients[i].id ] = activeUser
+
       }
-
-
-      // insertar cada usuario en el objeto
-      activeUsersList[ clients[i].id ] = activeUser
 
    }
 
    return activeUsersList
+
+}
+
+
+function startGroupConversation() {
+
+   var newConversation = {
+      participants: [],
+      messages: [],
+      startedAt: new Date()
+   }
+
+   conversations[ groupChatId ] = newConversation
+
+}
+
+
+function addToConversation( conversationId, userId ) {
+
+   chosenConversation = conversations[ conversationId ]
+
+   // buscar el usuario en la conversación
+   chosenUserIndex = chosenConversation.participants.indexOf( userId )
+
+   // si el usuario no está en la conversación, añádelo
+   if( chosenUserIndex === -1 ) {
+      chosenConversation.participants.push( userId )
+
+      clients[ userId ].conversations.push( conversationId )
+   }
+
+}
+
+function removeFromConversation( conversationId, userId ) {
+
+
+   chosenConversation = conversations[ conversationId ]
+
+   // buscar el usuario en la conversación
+   chosenUserIndex = chosenConversation.participants.indexOf( userId )
+
+   // si el usuario no está en la conversación, añádelo
+   if( chosenUserIndex !== -1 ) {
+      // sacar elemento del arreglo usando splice
+      chosenConversation.participants.splice( chosenUserIndex, 1 )
+
+      oldConversationIndex = clients[userId].conversations.indexOf( conversationId )
+
+      if( oldConversationIndex !== -1 ) {
+         clients[userId].conversations.splice( oldConversationIndex, 1 )
+      }
+
+      // eliminar conversaciones vacías, exceptuando la grupal:
+      if(
+         conversationId !== groupChatId
+         &&
+         conversations[conversationId].participants.length <= 0
+      ) {
+         delete conversations[conversationId]
+      }
+
+   }
 
 }

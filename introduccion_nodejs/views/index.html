@@ -42,9 +42,17 @@
 
          <p>Ingresa tu nombre de usuario</p>
 
+         <p id="login-warning-empty" class="warning hidden">
+            Por favor introduce un nombre de usuario
+         </p>
+
+         <p id="login-warning-duplicated" class="warning hidden">
+            Por favor elije un nombre de usuario distinto
+         </p>
+
          <input type="text" placeholder="nombredeusuario">
 
-         <button type="submit">
+         <button type="submit" class="btn">
             Entrar
          </button>
 
@@ -61,30 +69,59 @@
             </div>
 
             <div class="col-xs-6 col-md-4 col-lg-3 col-md-offset-4 col-lg-offset-6 text-right">
-               <button id="button-group-chat">
+               <button id="button-group-chat" class="btn">
                   Chat Grupal
                </button>
             </div>
          </header>
 
          <div id="users-messages-container">
-            <aside id="users" class="col-md-3 h-xs-30 h-md-100 scroll-y">
 
-               <ul>
+            <nav id="users-conversations-selector" class="visible-xs">
+               <button class="btn" data-target="users">
+                  Users
+               </button>
+               <button class="btn" data-target="conversations">
+                  Conversations
+               </button>
+            </nav>
 
-                  <li class="user model hidden">
-                     <span class="username">
-                        username
-                     </span>
-                     <span class="number-messages">
-                        0
-                     </span>
-                  </li>
+            <div id="users-conversations-panel" class="col-md-3 h-md-100">
+               <aside id="users" class="h-xs-100 h-md-50 hidden-xs scroll-y">
+
+                  <ul>
+
+                     <li class="user model hidden">
+                        <span class="username">
+                           username
+                        </span>
+                        <span class="number-messages">
+                           0
+                        </span>
+                     </li>
 
 
-               </ul>
+                  </ul>
 
-            </aside>
+               </aside>
+               <aside id="conversations" class="h-xs-100 h-md-50 scroll-y">
+
+                  <ul>
+
+                     <li class="conversation model">
+                        <span class="username">
+                           conversation
+                        </span>
+                        <span class="number-users">
+                           0
+                        </span>
+                     </li>
+
+
+                  </ul>
+
+               </aside>
+            </div>
 
             <main id="messages" class="col-md-9 h-xs-70 h-md-100 scroll-y">
                <ul>
@@ -109,7 +146,7 @@
                <input type="text" id="message" class="col-xs-9 col-md-10 col-lg-11">
 
                <!-- button.col-xs-3.col-md-2.col-lg-1[type=submit]{Enviar} -->
-               <button class="col-xs-3 col-md-2 col-lg-1" type="submit">
+               <button class="btn col-xs-3 col-md-2 col-lg-1" type="submit">
                   Enviar
                </button>
 
@@ -127,11 +164,16 @@
 
    <script>
 
-   var socket = io();
+   var socket = io()
 
    var currentActiveUsers
 
    var targetUserId
+
+
+   var conversations = []
+
+   var currentConversation
 
 
 
@@ -141,21 +183,40 @@
 
       username = $('#login-window input[type="text"]').val()
 
-      var payload = {
-         id: socket.id,
-         message: username
+      var shouldDoLogin = true
+
+      if( username === "" ) {
+         // avisar al usuario que debe corregir nombre vacio
+         $('#login-warning-empty').removeClass('hidden')
+         shouldDoLogin = false
       }
 
-      socket.emit('set username', payload )
+      if( ! isNameAvailable(username) ) {
+         // avisar al usuario que debe corregir nombre duplicado
+         $('#login-warning-duplicated').removeClass('hidden')
+         shouldDoLogin = false
+      }
 
 
-      $('#chat-window header h6').html( username )
+      if(shouldDoLogin) {
 
-      $('#login-window').fadeOut(300, function(){
+         var payload = {
+            id: socket.id,
+            message: username
+         }
 
-         $('#chat-window').fadeIn(300)
+         socket.emit('set username', payload )
 
-      })
+
+         $('#chat-window header h6').html( username )
+
+         $('#login-window').fadeOut(300, function(){
+
+            $('#chat-window').fadeIn(300)
+
+         })
+
+      }
 
       return false;
 
@@ -184,6 +245,21 @@
       return false
 
    });
+
+
+
+   // selector entre paneles users y conversations en movil
+
+   $('#users-conversations-selector button').click(function(){
+      var target = $(this).data('target')
+      selector = '#'+target
+console.log( selector )
+      if( $(selector).length > 0 ) {
+         $(selector).removeClass('hidden-xs').siblings().addClass('hidden-xs')
+      }
+   })
+
+
 
 
 
@@ -277,11 +353,9 @@
 
    }
 
-
    $('#button-group-chat').click(function(){
       targetUserId = undefined;
    })
-
 
    // si recibimos mensaje de un usuario
       // si tenemos la ventana de ese usuario abierta
@@ -289,6 +363,27 @@
       // de otro modo,
          // aumentar numero de mensajes no leidos de ese usuario en la lista de usuarios
 
+
+
+   function isNameAvailable(username) {
+
+      var available = true
+
+      for( i in currentActiveUsers ) {
+         if( username === currentActiveUsers[i].username ) {
+
+            available = false
+
+            // si ya encontramos uno, interrumpir la iteracion
+
+            break
+
+         }
+      }
+
+      return available
+
+   }
 
    </script>
 
