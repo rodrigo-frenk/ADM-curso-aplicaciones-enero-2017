@@ -103,6 +103,12 @@
 
                   </ul>
 
+                  <div id="add-users">
+                     <button class="btn col-xs-6" id="add-users-button">
+                        Añadir Usuarios
+                     </button>
+                  </div>
+
                </aside>
                <aside id="conversations" class="h-xs-100 h-md-50 scroll-y">
 
@@ -115,17 +121,34 @@
                         <span class="number-users">
                            0
                         </span>
+                        <span class="number-users-icon">
+                           u
+                        </span>
+                        <span class="number-new-messages">
+                           0
+                        </span>
+                        <span class="number-new-messages-icon">
+                           m
+                        </span>
                      </li>
 
 
                   </ul>
+
+
+                  <form id="new-conversation">
+                     <input class="col-xs-9" type="text" name="conversation-name">
+                     <button class="btn col-xs-3" type="submit">
+                        Nueva Conversación
+                     </button>
+                  </form>
 
                </aside>
             </div>
 
             <main id="messages" class="col-md-9 h-xs-70 h-md-100 scroll-y">
                <ul>
-                  <li class="message model">
+                  <li class="message model hidden">
                      <span class="datetime">
                         1/1/2017 - 16:20
                      </span>

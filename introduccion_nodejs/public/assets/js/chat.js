@@ -1,3 +1,4 @@
+// Variables globales para cada cliente
 
    var socket = io()
 
@@ -5,19 +6,21 @@
 
    var targetUserId
 
+   var targetConversationId
 
    var conversations = []
 
    var currentConversation
 
-   var userConversations
+   var userConversations = {}
 
+   var username
 
    // Interacciones de usuario
 
    $('#login-window').submit(function(){
 
-      var username = $('#login-window input[type="text"]').val()
+      username = $('#login-window input[type="text"]').val()
 
       var shouldDoLogin = true
 
@@ -64,17 +67,19 @@
 
       message = $('#message').val()
 
+      var messageObject = {
+         username: username,
+         message: message,
+         date: new Date()
+      }
 
       var payload = {
-         id: socket.id,
-         message: message
+         user_id: socket.id,
+         conversation_id: targetConversationId,
+         message: messageObject
       }
 
-      // si hay un usuario seleccionado, acompañar mensaje con ID de usuario destino
 
-      if( typeof(targetUserId) != "undefined" ) {
-         payload.targetId = targetUserId
-      }
 
       socket.emit('chat message', payload )
 
@@ -83,6 +88,20 @@
       return false
 
    });
+
+
+
+   $('#new-conversation').submit(function(){
+      conversationName = $('#new-conversation input[name=conversation-name]').val()
+      var payload = {
+         creator: socket.id,
+         name: conversationName
+      }
+
+      socket.emit( 'new conversation', payload )
+
+   });
+
 
 
 
@@ -125,6 +144,7 @@
       $('#users ul .user:not(.model)').remove()
 
       for(i in currentActiveUsers) {
+
          var userHtml = $('.user.model').clone().detach()
 
          userHtml.find('.username').html( currentActiveUsers[i].username )
@@ -144,7 +164,7 @@
    socket.on('user login', function(payload) {
 
       printMessage({
-         date: new Date(),
+         nodate: new Date(),
          username: payload.username,
          text: 'Entró al chat.'
       }, 'notification' )
@@ -162,20 +182,37 @@
    })
 
 
-   socket.on('update conversations', function(payload) {
-      console.log("UPDATE", payload)
 
-      userConversations = payload.conversations
+   socket.on('update conversation', function(payload) {
+      console.log("update!!!");
+      updateConversation( payload.conversation )
+
+   })
+
+
+   socket.on('update conversations', function(payload) {
+
+      for( i in payload.conversations ) {
+      console.log(payload.conversations )
+         updateConversation( payload.conversations[i] )
+      }
+
+      // if( typeof(targetConversationId) === "undefined" ) {
+      //    targetConversationId =
+      // }
 
       $('#conversations ul .conversation:not(.model)').remove()
 
-      for(i in userConversations) {
+
+      for(i in payload.conversations) {
          var conversationHtml = $('.conversation.model').clone().detach()
 
-         conversationHtml.find('.name').html( userConversations[i].name )
+         conversationHtml.find('.name').html(
+            payload.conversations[i].name
+         )
 
          conversationHtml.find('.number-users').html(
-            userConversations[i].participants.length
+            payload.conversations[i].participants.length
          )
 
          conversationHtml.attr( 'data-id', i )
@@ -191,6 +228,16 @@
 
    })
 
+
+   socket.on('set conversation', function( payload ) {
+
+      targetConversationId = payload.id
+
+      openConversation( userConversations[targetConversationId] )
+
+
+
+   })
 
 
 
@@ -232,28 +279,20 @@
    }
 
    function setupConversationClick() {
+
       // clicar un usuario para abrir conversación con él
+
       $('#conversations .conversation').click(function(){
          // obtener su ID a partir de atributo 'data-id' del 'li' clicado
 
-         $(this).addClass('active').siblings().removeClass('active')
+         $(this).addClass('active')
+         .siblings().removeClass('active')
 
 
          targetConversationId = $(this).data('id')
 
-         var messages = userConversations[ targetConversationId ].messages
+         openConversation( userConversations[ targetConversationId ] )
 
-         $('#messages ul .message:not(.model)').remove()
-
-         for( i in messages ) {
-
-            printMessage({
-               date: messages[i].date,
-               username: messages[i].username,
-               text: messages[i].message
-            }, 'message' )
-
-         }
 
       })
 
@@ -288,5 +327,103 @@
       }
 
       return available
+
+   }
+
+
+   function openConversation( conversation ) {
+
+      var messages = conversation.messages
+
+      $('#messages ul .message:not(.model)').remove()
+
+
+      for( i in messages ) {
+
+         // console.log(userConversations[conversation.id].messages);
+
+         printMessage({
+            date: messages[i].date,
+            username: messages[i].username,
+            text: messages[i].message
+         }, 'message' )
+
+      }
+
+      for( i in userConversations[ conversation.id ].messages ) {
+         userConversations[ conversation.id ].messages[i].viewed = true
+      }
+
+      $('#conversations .conversation[data-id='+conversation.id+']')
+      .find('.number-new-messages').html('0')
+
+
+
+   }
+
+
+
+
+   function updateConversation( conversation ) {
+
+      if( !( conversation.id in userConversations )) {
+         userConversations[conversation.id] = conversation
+      }
+      // console.log("conv", userConversations[conversation.id] );
+
+         // crear copia del arreglo de mensajes
+         localMessages = userConversations[ conversation.id ].messages.slice(0)
+         //
+         //
+         // console.log("openConversation( conversation )", conversation.id)
+
+         userConversations[ conversation.id ] = conversation
+
+         var newMessagesNumber = 0
+
+         if( targetConversationId === conversation.id ) {
+
+
+            openConversation( conversation )
+
+
+
+         } else {
+
+
+
+
+
+               // copiar solo los mensajes nuevos desde la conversación del server
+               serverMessages = conversation.messages
+
+
+               for( i in serverMessages ) {
+                  var isNew = true
+                  for( j in localMessages ) {
+
+                     if( serverMessages[i].id === localMessages[j].id ) {
+                        if( localMessages[j].viewed ) {
+                           userConversations[conversation.id].messages[i].viewed = true
+                           isNew = false
+                           break
+                        }
+                     }
+                  }
+                  if ( isNew ) {
+                     userConversations[conversation.id].messages[i].viewed = false
+                     newMessagesNumber++
+                  }
+
+               }
+
+               $('#conversations .conversation[data-id='+conversation.id+']')
+               .find('.number-new-messages').html(
+                  newMessagesNumber
+               )
+
+
+         }
+
 
    }

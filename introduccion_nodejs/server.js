@@ -2,6 +2,7 @@ var express = require('express')
 var app = express()
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var uuid = require('node-uuid');
 
 // línea necesaria para poder servir recursos desde nuestro HTML:
 
@@ -17,7 +18,7 @@ var clients = []
 
 var conversations = []
 
-var groupChatId = '#general'
+var groupChatId = 'general'
 
 /*
 
@@ -97,45 +98,51 @@ io.on('connection', function(socket){
 
    socket.on('chat message', function(payload){
 
-      console.log('message: ' + payload.message);
-      // obtener usuario a partir de la ID de la conexion:
+      console.log('message: ' + payload.message );
 
-      // debido a la naturaleza asincrónica de la app,
-      // tendremos que detectar qué socket está activo
-      // utilizando su Id y buscándola en nuestra lista
+      // Seleccionar la Conversacion
 
-      targetId = 0
+      var targetConversation = conversations[ payload.conversation_id ]
 
-      var messagePayload = {
-         sourceId: payload.id,
-         message: payload.message
+      // Introducir último mensaje a conversación:
+      var newMessage = {
+         id: uuid.v1(),
+         user_id: payload.user_id,
+         username: payload.message.username,
+         message: payload.message.message,
+         date: payload.message.date
       }
 
-      // // Verificar si el emisor especificó un destino:
-      // // esto lo haremos revisando si la variable tiene un valor asignado
-      // if(typeof( payload.targetId ) === "undefined") {
-      //
-      //    // si no, mandó un mensaje grupal
-      //
-      //    console.log( "TYPEOF", typeof( payload.targetId ) )
-      //    //
-      //    io.emit('chat message', messagePayload )
-      //
-      // } else {
-      //
-      //    //mesnaje privado
-      //    // almacenar id del destinatario en el mensaje
-      //    messagePayload.targetId = payload.targetId
-      //
-      //    clients[ payload.targetId ].socket.emit('chat message', messagePayload )
-      //
-      // }
+      console.log("new message:", newMessage.id );
 
+      targetConversation.messages.push( newMessage )
+
+      // Notifica a usuarios participantes que se actualizó la conversación
+
+      for ( i in targetConversation.participants ) {
+
+         var participantId = targetConversation.participants[ i ]
+
+         var payload = {
+            conversation: targetConversation
+         }
+
+         clients[ participantId ].socket.emit('update conversation', payload )
+
+      }
 
 
    });
 
+   socket.on('new conversation', function(payload){
+
+      console.log("CREATE NEW CONVERSATION", payload )
+
+   })
+
+
 });
+
 
 
 
@@ -159,6 +166,7 @@ function userListChanged() {
 function userLogin(socket) {
 
    addToConversation( groupChatId, socket.id )
+
    addToConversation( 'abcdefg', socket.id )
 
 
@@ -167,6 +175,8 @@ function userLogin(socket) {
    io.emit('user login', getUserPayload(socket))
 
    userListChanged()
+
+   setUserConversation( 'abcdefg', socket.id )
 
 }
 
@@ -239,19 +249,20 @@ function getActiveUsers() {
 function startGeneralConversation() {
 
    var newConversation = {
+      id: 'general',
       name: "General",
       participants: [],
       messages: [
-         {
-            username: "Nombre de Usuario",
-            message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
-            date: new Date(2017, 3, 8, 18, 3)
-         },
-         {
-            username: "Otro Usuario",
-            message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
-            date: new Date(2017, 3, 8, 19, 10)
-         },
+         // {
+         //    username: "Nombre de Usuario",
+         //    message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
+         //    date: new Date(2017, 3, 8, 18, 3)
+         // },
+         // {
+         //    username: "Otro Usuario",
+         //    message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
+         //    date: new Date(2017, 3, 8, 19, 10)
+         // },
 
       ],
       startedAt: new Date()
@@ -261,19 +272,20 @@ function startGeneralConversation() {
 
 
    conversations[ 'abcdefg' ] = {
+      id: 'abcdefg',
       name: "Ejemplo Dos",
       participants: [],
       messages: [
-         {
-            username: "Tercer Usuario",
-            message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
-            date: new Date(2017, 3, 8, 20, 20)
-         },
-         {
-            username: "Usuario Cuarto",
-            message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
-            date: new Date(2017, 3, 8, 21, 21)
-         },
+         // {
+         //    username: "Tercer Usuario",
+         //    message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
+         //    date: new Date(2017, 3, 8, 20, 20)
+         // },
+         // {
+         //    username: "Usuario Cuarto",
+         //    message: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quibusdam dolore laboriosam quis.",
+         //    date: new Date(2017, 3, 8, 21, 21)
+         // },
       ],
       startedAt: new Date()
    }
@@ -285,21 +297,23 @@ function addToConversation( conversationId, userId ) {
 
    var chosenConversation = conversations[ conversationId ]
 
-   // buscar el usuario en la conversación,
-   // obtener el índice dentro del arreglo
-   chosenUserIndex = chosenConversation.participants.indexOf( userId )
+   if( typeof( chosenConversation ) !== "undefined") {
+      // buscar el usuario en la conversación,
+      // obtener el índice dentro del arreglo
+      chosenUserIndex = chosenConversation.participants.indexOf( userId )
 
-   // si el usuario no está en la conversación, añádelo
-   if( chosenUserIndex === -1 ) {
+      // si el usuario no está en la conversación, añádelo
+      if( chosenUserIndex === -1 ) {
 
-      chosenConversation.participants.push( userId )
+         chosenConversation.participants.push( userId )
 
-      // clients[ userId ].conversations.push( conversationId )
+         // clients[ userId ].conversations.push( conversationId )
+      }
+
+
+      notifyConversationPeers( getUserConversations( userId ) )
+
    }
-
-
-   notifyConversationPeers( getUserConversations( userId ) )
-
 }
 
 
@@ -352,7 +366,7 @@ function getUserConversations( id ) {
 
       if( index !== -1 ) {
 
-         userConversations[i] = conversations[ i ]
+         userConversations[ i ] = conversations[ i ]
 
       }
 
@@ -386,5 +400,16 @@ function notifyConversationPeers( userConversations ) {
       }
 
    }
+
+}
+
+
+function setUserConversation( conversationId, userId ) {
+
+   var payload = {
+      id: conversationId
+   }
+
+   clients[ userId ].socket.emit( 'set conversation', payload )
 
 }
